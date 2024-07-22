@@ -1,5 +1,5 @@
 {
-  "name": "restaurants-api",
+  "name": "maps-enhanced-api",
   "module": "index.ts",
   "type": "module",
   "scripts": {

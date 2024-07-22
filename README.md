@@ -1,4 +1,4 @@
-# restaurants-api
+# maps-enhanced-api
 
 To install dependencies:
 
