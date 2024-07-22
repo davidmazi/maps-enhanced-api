@@ -1,5 +1,11 @@
 import { restaurantsRouter } from "./routes/restaurants.routes";
 
+declare module "bun" {
+  interface Env {
+    GMAPS_API_KEY: string;
+  }
+}
+
 function validateEnvironment() {
   const requiredEnvVars = ["GMAPS_API_KEY"];
   const missingEnvVars = requiredEnvVars.filter((varName) => !Bun.env[varName]);

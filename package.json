@@ -7,6 +7,7 @@
     "start": "bun run index.ts"
   },
   "devDependencies": {
+    "@types/axios": "^0.14.0",
     "@types/bun": "latest"
   },
   "peerDependencies": {
@@ -14,8 +15,8 @@
   },
   "dependencies": {
     "@googlemaps/google-maps-services-js": "^3.4.0",
-    "bun": "^1.1.20",
-    "fetch-to-curl": "^0.6.0"
+    "axios": "^1.7.2",
+    "bun": "^1.1.20"
   },
   "overrides": {
     "@googlemaps/url-signature": "1.0.32"

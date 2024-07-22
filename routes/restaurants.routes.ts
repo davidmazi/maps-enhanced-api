@@ -1,7 +1,7 @@
 import { RestaurantService } from "../services/restaurants.service";
 
 const restaurantService = new RestaurantService();
-let pageToken = "";
+
 export async function restaurantsRouter(req: Request): Promise<Response> {
   const url = new URL(req.url);
 

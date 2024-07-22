@@ -1,6 +1,6 @@
 export type Restaurant = {
   name: string;
-  gmapsPhotoRef?: string;
+  photoUrl: string | null;
   rating: number | null;
   address: string;
   type: string;
