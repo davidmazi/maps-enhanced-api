@@ -47,12 +47,13 @@ export class RestaurantService {
     lng: number,
     radius: number = 500
   ): Promise<Restaurant[]> {
+    const type = PlaceType1.restaurant; // TODO make dynamic (from input)
     try {
       const response = await this.placesNearbyWithRetry({
         params: {
           location: { lat, lng },
           radius,
-          type: PlaceType1.restaurant,
+          type,
           maxprice: 2,
           key: this.googleApiKey,
           pagetoken: this.gmapsPageToken,
@@ -61,24 +62,30 @@ export class RestaurantService {
 
       if (response.data.status === "OK" && response.data.results) {
         this.gmapsPageToken = response.data.next_page_token;
+        const restaurants: Restaurant[] = [];
 
-        const restaurants = await Promise.all(
-          response.data.results.map(async (place) => {
-            const photoUrl = await getPhotoUrl(
-              place.photos?.[0]?.photo_reference
-            );
+        for (const place of response.data.results) {
+          const { business_status, name, geometry } = place;
+          if (business_status !== "OPERATIONAL" || !name || !geometry) continue;
 
-            return {
-              name: place.name || "Unknown Restaurant",
-              photoUrl: photoUrl,
-              rating: place.rating || null,
-              address: place.vicinity || "Unknown Address",
-              type: place.types?.[0] || "Various",
-              latitude: place.geometry?.location?.lat || 0,
-              longitude: place.geometry?.location?.lng || 0,
-            };
-          })
-        );
+          const photoUrl = await getPhotoUrl(
+            place.photos?.[0]?.photo_reference
+          );
+
+          const restaurant: Restaurant = {
+            name,
+            rating: place.rating ?? null,
+            totalRatings: place.user_ratings_total ?? null,
+            openNow: place.opening_hours?.open_now ?? null,
+            photoUrl: photoUrl,
+            address: place.vicinity ?? null,
+            type: place.types?.[0] ?? type,
+            latitude: geometry.location.lat,
+            longitude: geometry.location.lng,
+          };
+
+          restaurants.push(restaurant);
+        }
 
         return restaurants;
       } else {
@@ -114,7 +121,7 @@ export class RestaurantService {
           }
         );
 
-        return response.headers.location || null;
+        return response.headers.location ?? null;
       } catch (error) {
         console.error("Error fetching photo URL:", error);
         return null;
