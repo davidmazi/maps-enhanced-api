@@ -1,7 +1,12 @@
-import axios from "axios";
+import axios, { AxiosError, isAxiosError } from "axios";
 import type { Restaurant } from "../types/restaurant.types";
 
-import { Client, PlaceType1 } from "@googlemaps/google-maps-services-js";
+import {
+  Client,
+  PlacesNearbyRequest,
+  PlacesNearbyResponse,
+  PlaceType1,
+} from "@googlemaps/google-maps-services-js";
 
 export class RestaurantService {
   private googleMapsClient: Client;
@@ -12,13 +17,38 @@ export class RestaurantService {
     this.googleMapsClient = new Client({});
   }
 
+  private async placesNearbyWithRetry(
+    { params }: PlacesNearbyRequest,
+    retryCount = 0
+  ): Promise<PlacesNearbyResponse> {
+    try {
+      const response = await this.googleMapsClient.placesNearby({ params });
+      return response;
+    } catch (error) {
+      if (
+        isAxiosError(error) &&
+        error.response?.status === 400 &&
+        retryCount < 1
+      ) {
+        console.log(
+          `Retrying placesNearby call after 400 error. Attempt: ${
+            retryCount + 1
+          }`
+        );
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second before retrying
+        return this.placesNearbyWithRetry({ params }, retryCount + 1);
+      }
+      throw error;
+    }
+  }
+
   async getHighlyRatedRestaurants(
     lat: number,
     lng: number,
     radius: number = 500
   ): Promise<Restaurant[]> {
     try {
-      const response = await this.googleMapsClient.placesNearby({
+      const response = await this.placesNearbyWithRetry({
         params: {
           location: { lat, lng },
           radius,
@@ -55,7 +85,12 @@ export class RestaurantService {
         throw new Error(`Failed to fetch restaurants: ${response.data.status}`);
       }
     } catch (error) {
-      console.error("Error fetching highly rated restaurants:", error);
+      if (isAxiosError(error))
+        console.error(
+          "Error fetching highly rated restaurants:",
+          (error as AxiosError).response?.data
+        );
+
       return [];
     }
 

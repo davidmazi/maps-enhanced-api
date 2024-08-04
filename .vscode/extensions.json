@@ -1,7 +1,7 @@
 {
-  "recommendations": [
-    "bruno-api-client.bruno",
-    "oven.bun-vscode",
-    "aaron-bond.better-comments"
-  ]
+	"recommendations": [
+		"bruno-api-client.bruno",
+		"oven.bun-vscode",
+		"aaron-bond.better-comments"
+	]
 }

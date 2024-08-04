@@ -6,12 +6,13 @@ export async function restaurantsRouter(req: Request): Promise<Response> {
   const url = new URL(req.url);
 
   if (url.pathname === "/restaurants" && req.method === "GET") {
-    // const restaurants = await restaurantService.getRandomRestaurants(5);
-    // await new Promise((resolve) => setTimeout(resolve, 5000));
+    const latitude = Number.parseFloat(url.searchParams.get("latitude")!);
+
+    const longitude = Number.parseFloat(url.searchParams.get("longitude")!);
 
     const restaurants = await restaurantService.getHighlyRatedRestaurants(
-      48.8566,
-      2.3522
+      latitude,
+      longitude
     );
 
     return new Response(JSON.stringify(restaurants), {
